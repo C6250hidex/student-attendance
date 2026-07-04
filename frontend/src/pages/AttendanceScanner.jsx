@@ -86,88 +86,133 @@ const AttendanceScanner = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold flex items-center gap-2">
-        <Camera className="text-primary" /> Attendance Scanner
+    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
+      {/* View Header */}
+      <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
+        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+          <Camera size={20} />
+        </div>
+        Attendance Scanner
       </h1>
 
       {!sessionId ? (
-        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 text-center space-y-6">
-          <div className="space-y-2">
-            <h2 className="text-xl font-semibold">Select Course to Scan</h2>
-            <p className="text-gray-500">
-              Pick the course you are currently teaching
+        /* Configuration Stage Control Panel Card */
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center space-y-6">
+          <div className="space-y-1.5 max-w-md mx-auto">
+            <h2 className="text-xl font-bold tracking-tight text-slate-800">
+              Select Course to Scan
+            </h2>
+            <p className="text-sm text-slate-500">
+              Pick the active academic course module you are currently hosting
+              to activate authentication terminals.
             </p>
           </div>
 
-          <select
-            className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary outline-none text-lg"
-            onChange={(e) => setSelectedCourse(e.target.value)}
-          >
-            <option value="">Choose Course...</option>
-            {courses.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.course_code} - {c.course_title}
-              </option>
-            ))}
-          </select>
-
-          <button
-            onClick={startAttendance}
-            disabled={!selectedCourse}
-            className="w-full bg-primary hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg active:scale-95 disabled:bg-gray-300"
-          >
-            Initialize Webcam Scanner
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* The Camera Container */}
-          <div className="bg-white p-4 rounded-2xl shadow-xl border-2 border-primary overflow-hidden">
-            <div id="reader" className="rounded-lg overflow-hidden"></div>
+          <div className="max-w-xl mx-auto">
+            <select
+              className="block w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-base text-slate-900 transition duration-200 ease-in-out focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 shadow-sm"
+              onChange={(e) => setSelectedCourse(e.target.value)}
+            >
+              <option value="">Choose Course...</option>
+              {courses.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.course_code} — {c.course_title}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* Status & Feedback Panel */}
-          <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 space-y-6">
-            <div className="flex items-center justify-between border-b pb-4">
+          <div className="max-w-xl mx-auto pt-2">
+            <button
+              onClick={startAttendance}
+              disabled={!selectedCourse}
+              className="inline-flex items-center justify-center w-full rounded-xl bg-blue-600 px-6 py-3.5 text-base font-semibold text-white shadow-md shadow-blue-600/10 transition-all duration-200 ease-in-out hover:bg-blue-500 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:pointer-events-none disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
+            >
+              Initialize Webcam Scanner
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* Active Scanner Grid Terminal */
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+          {/* Hardware Stream Viewfinder Frame */}
+          <div className="bg-slate-950 p-3 rounded-2xl shadow-md border border-slate-800 relative overflow-hidden group">
+            <div className="absolute top-4 left-4 z-10 flex items-center space-x-2 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-md border border-slate-700/50">
+              <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+              <span className="text-[10px] font-bold text-slate-300 tracking-wider uppercase">
+                Camera Source
+              </span>
+            </div>
+            <div
+              id="reader"
+              className="rounded-xl overflow-hidden [&_video]:rounded-xl [&_img]:mx-auto bg-slate-900"
+            ></div>
+          </div>
+
+          {/* Operational Status Control Deck Panel */}
+          <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-5">
               <div>
-                <h3 className="font-bold text-xl">Active Session</h3>
-                <p className="text-sm text-gray-500">Ready to receive codes</p>
+                <h3 className="font-bold text-lg text-slate-900 tracking-tight">
+                  Active Terminal
+                </h3>
+                <p className="text-xs font-medium text-slate-500 mt-0.5">
+                  Hardware operational, reading credentials
+                </p>
               </div>
-              <div className="flex items-center gap-2 bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-bold uppercase">
-                <span className="animate-ping h-2 w-2 rounded-full bg-green-500"></span>
+              <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider ring-1 ring-inset ring-emerald-600/10">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
                 Live
               </div>
             </div>
 
+            {/* Scanning Status Feedback Shield */}
             <div
-              className={`p-6 rounded-xl border-2 transition-all ${lastScanned ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-100"}`}
+              className={`p-5 rounded-xl border transition-all duration-300 ${
+                lastScanned
+                  ? "bg-blue-50/60 border-blue-200/80 shadow-inner"
+                  : "bg-slate-50/80 border-slate-200/60"
+              }`}
             >
-              <p className="text-sm text-gray-500 font-bold mb-1 uppercase tracking-wider">
+              <p className="text-[11px] text-slate-500 font-bold mb-2 uppercase tracking-widest">
                 Current Scan Result
               </p>
               <div className="flex items-center gap-3">
-                {lastScanned ? (
-                  <CheckCircle2 className="text-primary animate-bounce" />
-                ) : (
-                  <RefreshCcw className="text-gray-300 animate-spin" />
-                )}
-                <span className="text-lg font-mono font-bold break-all">
-                  {lastScanned || "Scanning..."}
+                <div className="flex-shrink-0">
+                  {lastScanned ? (
+                    <CheckCircle2
+                      className="text-blue-600 animate-bounce"
+                      size={22}
+                    />
+                  ) : (
+                    <RefreshCcw
+                      className="text-slate-400 animate-spin"
+                      size={20}
+                    />
+                  )}
+                </div>
+                <span
+                  className={`text-base font-mono font-bold break-all tracking-tight ${lastScanned ? "text-blue-900" : "text-slate-500"}`}
+                >
+                  {lastScanned || "Awaiting credentials..."}
                 </span>
               </div>
             </div>
 
-            <div className="space-y-3 pt-4">
-              <p className="text-xs text-gray-400 text-center">
-                Ensure the student ID card is well-lit and centered in the
-                frame.
+            {/* Security Actions Section */}
+            <div className="space-y-4 pt-2">
+              <p className="text-xs leading-relaxed text-slate-400 text-center max-w-xs mx-auto">
+                Align the student identity card's barcode or QR module directly
+                within the central viewfinder crosshairs under flat lighting.
               </p>
               <button
                 onClick={() => window.location.reload()}
-                className="w-full border-2 border-red-500 text-red-500 hover:bg-red-50 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition"
+                className="inline-flex items-center justify-center w-full gap-2 border-2 border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-rose-500/10"
               >
-                <StopCircle size={20} /> Terminate Session
+                <StopCircle size={18} /> Terminate Session
               </button>
             </div>
           </div>

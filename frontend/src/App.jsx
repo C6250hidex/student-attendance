@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Lecturers from "./pages/Lecturers";
 import StudentProfile from "./pages/StudentProfile";
 import Courses from "./pages/Courses";
+import Reports from "./pages/Reports";
 import AttendanceScanner from "./pages/AttendanceScanner";
 
 // Small component to protect routes
@@ -77,6 +78,14 @@ function App() {
           element={
             <PrivateRoute>
               <AttendanceScanner />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/reports"
+          element={
+            <PrivateRoute>
+              <Reports />
             </PrivateRoute>
           }
         />

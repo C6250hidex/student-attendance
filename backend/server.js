@@ -17,6 +17,7 @@ import lecturerRoutes from "./routes/lecturerRoutes.js";
 import courseRoutes from "./routes/courseRoutes.js";
 import departmentRoutes from "./routes/departmentRoutes.js";
 import attendanceRoutes from "./routes/attendanceRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -25,7 +26,7 @@ const server = http.createServer(app);
 // Initialize Socket.io with proper CORS settings
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", // Your React App URL
+    origin: process.env.FRONTEND_URL || "http://localhost:5173", // Your React App URL
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -37,7 +38,12 @@ app.use(
     crossOriginResourcePolicy: false, // Allows images to be loaded from backend
   }),
 );
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true,
+  }),
+);
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -66,6 +72,7 @@ app.use("/api/lecturers", lecturerRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/departments", departmentRoutes);
 app.use("/api/attendance", attendanceRoutes);
+app.use("/api/reports", reportRoutes);
 
 // Health Check
 app.get("/", (req, res) => {

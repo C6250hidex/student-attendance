@@ -12,17 +12,20 @@ const IDCard = ({ student }) => {
   return (
     <div
       id="id-card"
-      className="w-[350px] h-[500px] border-2 border-gray-800 bg-white p-4 rounded-xl shadow-2xl relative overflow-hidden flex flex-col items-center"
+      className="w-[350px] h-[500px] border border-slate-200 bg-gradient-to-b from-white to-slate-50/50 p-4 rounded-2xl shadow-xl relative overflow-hidden flex flex-col items-center"
     >
-      {/* Header */}
-      <div className="bg-primary w-full text-white text-center py-3 absolute top-0">
-        <h2 className="text-xs font-bold tracking-widest uppercase">
+      {/* Premium Header Accent Layer */}
+      <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-r from-blue-600 to-indigo-700 opacity-10 pointer-events-none" />
+
+      {/* Header Text Banner */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 w-full text-white text-center py-3.5 absolute top-0 shadow-sm">
+        <h2 className="text-[10px] font-bold tracking-[0.15em] uppercase text-blue-50">
           University Attendance System
         </h2>
       </div>
 
-      {/* Student Photo */}
-      <div className="mt-12 w-32 h-32 border-4 border-primary overflow-hidden rounded-xl shadow-md bg-gray-100">
+      {/* Student Photo Container */}
+      <div className="mt-14 w-32 h-32 border-4 border-white ring-4 ring-blue-600/10 overflow-hidden rounded-full shadow-md bg-slate-100 flex-shrink-0 z-10 transition-transform duration-300 hover:scale-105">
         <img
           src={photoUrl}
           alt="Student"
@@ -33,57 +36,62 @@ const IDCard = ({ student }) => {
         />
       </div>
 
-      {/* Student Details */}
-      <div className="text-center mt-6">
-        <h3 className="text-xl font-bold uppercase text-gray-800 leading-tight">
+      {/* Student Details Block */}
+      <div className="text-center mt-5 space-y-1 w-full px-2">
+        <h3 className="text-lg font-bold uppercase tracking-wide text-slate-800 leading-tight truncate">
           {student.full_name || "N/A"}
         </h3>
-        <p className="text-gray-500 font-mono text-sm mt-1 uppercase">
+        <p className="text-blue-600 font-mono text-sm font-semibold tracking-wider uppercase">
           {student.matric_number || "N/A"}
         </p>
-        <p className="text-xs font-semibold text-gray-400 mt-2">
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide truncate max-w-xs mx-auto">
           {student.department_name || "N/A"}
         </p>
-        <div className="mt-2 inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold">
-          LEVEL: {student.level}
+
+        <div className="pt-1.5">
+          <span className="inline-flex items-center rounded-md bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-blue-700 ring-1 ring-inset ring-blue-700/10">
+            LEVEL: {student.level}
+          </span>
         </div>
       </div>
 
-      {/* Barcode & QR Code Section */}
-      <div className="mt-auto flex flex-col items-center w-full pb-6 space-y-3">
-        {/* Barcode */}
-        <div className="bg-white p-1 rounded">
+      {/* Scannable Codes Segment */}
+      <div className="mt-auto flex items-center justify-between w-full max-w-[290px] pb-6 bg-white/60 backdrop-blur-sm p-3 rounded-xl border border-slate-100/80 shadow-sm mb-3">
+        {/* Barcode Element */}
+        <div className="flex flex-col items-center justify-center bg-white p-1.5 rounded-lg border border-slate-100 shadow-sm">
           {student.barcode ? (
             <Barcode
               value={student.barcode}
-              height={35}
-              width={1.2}
-              fontSize={10}
+              height={32}
+              width={1.0}
+              fontSize={9}
               background="transparent"
             />
           ) : (
-            <p className="text-[8px] text-red-500">Barcode Data Missing</p>
+            <p className="text-[8px] font-bold tracking-wider text-rose-500 py-2 px-1">
+              Barcode Missing
+            </p>
           )}
         </div>
 
-        {/* QR Code */}
-        <div className="w-20 h-20 bg-gray-50 p-1 border border-gray-100 rounded-lg">
+        {/* QR Code Graphic Frame */}
+        <div className="w-16 h-16 bg-white p-1.5 border border-slate-100 shadow-sm rounded-lg flex items-center justify-center flex-shrink-0">
           {student.qr_code_image ? (
             <img
               src={student.qr_code_image}
               alt="QR"
-              className="w-full h-full"
+              className="w-full h-full object-contain"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-[8px] text-gray-400">
+            <div className="w-full h-full flex items-center justify-center text-[8px] font-medium text-slate-400 bg-slate-50 rounded">
               No QR
             </div>
           )}
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="bg-primary w-full text-[9px] text-white text-center py-1 absolute bottom-0 font-medium">
+      {/* Bottom Legal Identification Banner */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 w-full text-[9px] font-bold tracking-widest text-blue-100 text-center py-2 absolute bottom-0">
         OFFICIAL STUDENT IDENTIFICATION CARD
       </div>
     </div>
