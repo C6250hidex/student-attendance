@@ -4,9 +4,13 @@ import Barcode from "react-barcode";
 const IDCard = ({ student }) => {
   if (!student) return null;
 
-  // Construct the full URL for the photo
+  // FIX: Dynamic Base URL for Render Deployment
+  const BASE_URL =
+    import.meta.env.VITE_API_URL?.replace("/api", "") ||
+    "http://localhost:5000";
+
   const photoUrl = student.photo
-    ? `http://localhost:5000/${student.photo.replace(/\\/g, "/")}`
+    ? `${BASE_URL}/${student.photo.replace(/\\/g, "/")}`
     : "https://via.placeholder.com/150";
 
   return (

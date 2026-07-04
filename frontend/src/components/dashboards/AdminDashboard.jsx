@@ -81,32 +81,43 @@ const AdminDashboard = ({ data }) => (
       </div>
 
       <div className="divide-y divide-slate-100 px-6">
-        {data.recent.map((log, i) => (
-          <div
-            key={i}
-            className="group flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 transition-colors duration-200 hover:bg-slate-50/50 -mx-6 px-6"
-          >
-            <div className="flex items-center space-x-3 mb-2 sm:mb-0">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 ring-4 ring-emerald-50 animate-pulse" />
-              <span className="font-semibold text-sm text-slate-800 tracking-wide">
-                {log.full_name}
-              </span>
-            </div>
+        {/* FIXED: Added conditional check for empty or null records */}
+        {data.recent && data.recent.length > 0 ? (
+          data.recent.map((log, i) => (
+            <div
+              key={i}
+              className="group flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 transition-colors duration-200 hover:bg-slate-50/50 -mx-6 px-6"
+            >
+              <div className="flex items-center space-x-3 mb-2 sm:mb-0">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 ring-4 ring-emerald-50 animate-pulse" />
+                <span className="font-semibold text-sm text-slate-800 tracking-wide">
+                  {log.full_name}
+                </span>
+              </div>
 
-            <div className="flex items-center justify-between sm:justify-end sm:space-x-8">
-              <span className="inline-flex items-center rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                {log.course_code}
-              </span>
-              <span className="text-xs font-medium text-slate-400 tabular-nums">
-                {new Date(log.scanned_at).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                })}
-              </span>
+              <div className="flex items-center justify-between sm:justify-end sm:space-x-8">
+                <span className="inline-flex items-center rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                  {log.course_code}
+                </span>
+                <span className="text-xs font-medium text-slate-400 tabular-nums">
+                  {new Date(log.scanned_at).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })}
+                </span>
+              </div>
             </div>
+          ))
+        ) : (
+          /* Empty State UI */
+          <div className="py-12 text-center text-slate-400 flex flex-col items-center justify-center">
+            <Activity className="mb-2 opacity-20" size={32} />
+            <p className="text-sm font-medium">
+              No check-ins recorded yet for today.
+            </p>
           </div>
-        ))}
+        )}
       </div>
     </div>
   </div>

@@ -20,6 +20,22 @@ const StudentProfile = () => {
     fetchMyProfile();
   }, []);
 
+  useEffect(() => {
+    // Set the document title so the PDF name looks professional when saving
+    document.title = `ID_Card_${user?.full_name || "Student"}`;
+
+    const fetchMyProfile = async () => {
+      try {
+        const res = await api.get(`/students/profile/me`);
+        setStudentData(res.data);
+      } catch (err) {
+        toast.error("Security: Unable to verify student credentials.");
+        console.error("Failed to load profile", err);
+      }
+    };
+    fetchMyProfile();
+  }, [user]);
+
   if (!studentData) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center p-10 space-y-4 text-slate-500">

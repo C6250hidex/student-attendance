@@ -27,6 +27,21 @@ const AttendanceScanner = () => {
       toast.error("Failed to start session");
     }
   };
+  const stopAttendance = async () => {
+    if (
+      window.confirm(
+        "Are you sure you want to close this session? No more students will be able to scan.",
+      )
+    ) {
+      try {
+        // We should create this 'close' endpoint in the backend
+        await api.put(`/attendance/session/${sessionId}/close`);
+        window.location.reload();
+      } catch (err) {
+        window.location.reload(); // Fail gracefully
+      }
+    }
+  };
 
   // UseEffect to start scanner ONLY when sessionId is set
   useEffect(() => {
@@ -209,7 +224,7 @@ const AttendanceScanner = () => {
                 within the central viewfinder crosshairs under flat lighting.
               </p>
               <button
-                onClick={() => window.location.reload()}
+                onClick={stopAttendance}
                 className="inline-flex items-center justify-center w-full gap-2 border-2 border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-rose-500/10"
               >
                 <StopCircle size={18} /> Terminate Session

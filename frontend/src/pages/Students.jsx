@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import api from "../services/api";
 import { toast } from "react-toastify";
 import IDCard from "../components/IDCard";
-import { UserPlus, Printer, X, ShieldAlert, GraduationCap } from "lucide-react";
+import { UserPlus, Printer, X, GraduationCap } from "lucide-react";
 
 const Students = () => {
   const [students, setStudents] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [formData, setFormData] = useState({
@@ -19,6 +20,7 @@ const Students = () => {
 
   useEffect(() => {
     fetchStudents();
+    fetchDepartments();
   }, []);
 
   const fetchStudents = async () => {
@@ -27,6 +29,14 @@ const Students = () => {
       setStudents(res.data);
     } catch (err) {
       toast.error("Failed to load students");
+    }
+  };
+  const fetchDepartments = async () => {
+    try {
+        const res = await api.get("/departments");
+        setDepartments(res.data);
+    } catch (err) {
+        console.error("Dept fetch error");
     }
   };
 
@@ -199,6 +209,27 @@ const Students = () => {
                   }
                   required
                 />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">
+                  Department
+                </label>
+                <select
+                  className="w-full border border-slate-200 focus:border-slate-400 outline-none p-2.5 rounded-xl transition text-sm bg-slate-50/50 appearance-none"
+                  onChange={(e) =>
+                    setFormData({ ...formData, department_id: e.target.value })
+                  }
+                  value={formData.department_id}
+                  required
+                >
+                  <option value="">Select Department</option>
+                  {departments.map((dept) => (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="space-y-1">

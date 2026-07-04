@@ -1,27 +1,31 @@
-import React from "react";
+import React, { useContext } from "react";
 import Sidebar from "./Sidebar";
+import { AuthContext } from "../store/AuthContext";
 
 const Layout = ({ children }) => {
+  const { user } = useContext(AuthContext);
+
   return (
-    <div className="flex h-screen bg-slate-50 text-slate-900 antialiased">
-      {/* Structural Workspace Sidebar */}
+    // FIX: Added flex-col for mobile and flex-row for desktop
+    <div className="flex flex-col lg:flex-row h-screen bg-slate-50 text-slate-900 antialiased">
       <Sidebar />
 
-      {/* Main Context Workspace Wrapper */}
+      {/* Main Workspace */}
       <main className="flex-1 overflow-y-auto flex flex-col">
-        {/* Modernized Top Navigation Header */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md h-16 border-b border-slate-200 flex items-center px-6 sm:px-8 justify-end transition-all duration-300">
+        {/* Top Navigation Header */}
+        {/* We hide the Layout header on mobile because Sidebar.jsx already has a mobile header */}
+        <header className="hidden lg:flex sticky top-0 z-30 bg-white/80 backdrop-blur-md h-16 border-b border-slate-200 items-center px-8 justify-end">
           <div className="flex items-center space-x-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
               Role:
             </span>
             <span className="inline-flex items-center rounded-md bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 ring-1 ring-inset ring-blue-700/10 shadow-sm capitalize">
-              {JSON.parse(localStorage.getItem("user"))?.role || "Guest"}
+              {user?.role || "Guest"}
             </span>
           </div>
         </header>
 
-        {/* Dynamic Inner Page Content Body Canvas */}
+        {/* Page Content */}
         <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto animate-fade-in">
           {children}
         </div>

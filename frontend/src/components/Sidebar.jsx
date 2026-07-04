@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AuthContext } from "../store/AuthContext";
 import {
@@ -10,7 +10,7 @@ import {
   Camera,
   Menu,
   X,
-  ClipboardList, // Add this
+  ClipboardList,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -186,7 +186,7 @@ const Sidebar = () => {
       </div>
 
       {/* 4. CONTENT WRAPPER PADDING SHUNT: Prevents mobile top headers from overlapping layout routes */}
-      <div className="lg:hidden h-16 w-full no-print" />
+      <div className="lg:hidden h-16 flex-shrink-0 no-print" />
     </>
   );
 };

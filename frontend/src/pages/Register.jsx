@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import { toast } from "react-toastify";
 import {
@@ -8,23 +8,46 @@ import {
   User,
   GraduationCap,
   FileImage,
+  Loader2,
+  Building2,
 } from "lucide-react";
 
 const Register = () => {
   const [role, setRole] = useState("student");
   const [photo, setPhoto] = useState(null);
+  const [departments, setDepartments] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
     password: "",
-    department_id: "1",
+    department_id: "",
     matric_number: "",
     staff_id: "",
     level: "100",
   });
 
+  // Fetch departments from the backend on component mount
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const res = await api.get("/departments");
+        setDepartments(res.data);
+        // Default to the first department if available
+        if (res.data.length > 0) {
+          setFormData((prev) => ({ ...prev, department_id: res.data[0].id }));
+        }
+      } catch (err) {
+        toast.error("Critical: Could not load departments.");
+      }
+    };
+    fetchDepartments();
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     const data = new FormData();
     data.append("role", role);
@@ -45,10 +68,23 @@ const Register = () => {
       await api.post("/users/register", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      toast.success(`${role.toUpperCase()} Registered!`);
+      toast.success(`${role.toUpperCase()} Profile Provisioned Successfully!`);
+
+      // Reset sensitive fields
       setPhoto(null);
+      setFormData({
+        ...formData,
+        full_name: "",
+        email: "",
+        password: "",
+        matric_number: "",
+        staff_id: "",
+      });
+      e.target.reset();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Registration Failed");
+      toast.error(err.response?.data?.message || "Registration Engine Failure");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -110,8 +146,9 @@ const Register = () => {
           </label>
           <input
             type="text"
-            className="block w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 transition duration-200 ease-in-out focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-400"
-            placeholder="e.g., Prof. John Doe"
+            value={formData.full_name}
+            className="block w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 transition duration-200 focus:border-blue-500 focus:bg-white outline-none focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-400"
+            placeholder="e.g., Maku Salihu"
             onChange={(e) =>
               setFormData({ ...formData, full_name: e.target.value })
             }
@@ -119,14 +156,15 @@ const Register = () => {
           />
         </div>
 
-        {/* Institutional Email Address Field Block */}
+        {/* Institutional Email */}
         <div className="space-y-1.5">
           <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
             Email Address
           </label>
           <input
             type="email"
-            className="block w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 transition duration-200 ease-in-out focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-400"
+            value={formData.email}
+            className="block w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 transition duration-200 focus:border-blue-500 focus:bg-white outline-none focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-400"
             placeholder="identity@university.edu"
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value })
@@ -135,14 +173,15 @@ const Register = () => {
           />
         </div>
 
-        {/* Temporary Security Key Field Block */}
+        {/* Password */}
         <div className="space-y-1.5">
           <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
             Login Password
           </label>
           <input
             type="password"
-            className="block w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 transition duration-200 ease-in-out focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-400"
+            value={formData.password}
+            className="block w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 transition duration-200 focus:border-blue-500 focus:bg-white outline-none focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-400"
             placeholder="••••••••"
             onChange={(e) =>
               setFormData({ ...formData, password: e.target.value })
@@ -151,12 +190,33 @@ const Register = () => {
           />
         </div>
 
+        {/* Dynamic Department Selection Field */}
+        <div className="sm:col-span-2 space-y-1.5">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <Building2 size={12} /> Assigned Department
+          </label>
+          <select
+            value={formData.department_id}
+            className="block w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 transition duration-200 focus:border-blue-500 focus:bg-white outline-none focus:ring-4 focus:ring-blue-500/10 cursor-pointer"
+            onChange={(e) =>
+              setFormData({ ...formData, department_id: e.target.value })
+            }
+            required
+          >
+            <option value="">Select Department...</option>
+            {departments.map((dept) => (
+              <option key={dept.id} value={dept.id}>
+                {dept.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* STUDENT DYNAMIC FIELD DOMAIN */}
         {role === "student" && (
           <>
-            {/* Visual Biomimetic Profile Photo Dropzone Area */}
-            <div className="sm:col-span-2 group border-2 border-dashed border-slate-200 hover:border-blue-400 p-6 rounded-2xl flex flex-col items-center bg-slate-50/50 hover:bg-white transition-all duration-200 ease-in-out">
-              <label className="cursor-pointer flex flex-col items-center w-full">
+            <div className="sm:col-span-2 group border-2 border-dashed border-slate-200 hover:border-blue-400 p-6 rounded-2xl flex flex-col items-center bg-slate-50/50 hover:bg-white transition-all duration-200">
+              <label className="cursor-pointer flex flex-col items-center w-full text-center">
                 <div
                   className={`p-3 rounded-xl mb-2 transition duration-200 ${photo ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600"}`}
                 >
@@ -167,10 +227,10 @@ const Register = () => {
                     ? "Biometric Data Staged"
                     : "Upload Verification Photo"}
                 </span>
-                <span className="text-xs text-slate-400 mt-1 font-medium max-w-xs text-center">
+                <span className="text-xs text-slate-400 mt-1 font-medium">
                   {photo
-                    ? `Selected file: ${photo.name}`
-                    : "Supports JPEG, PNG or WEBP formats for face validation pipelines."}
+                    ? `Selected: ${photo.name}`
+                    : "Supports JPEG, PNG or WEBP face validation."}
                 </span>
                 <input
                   type="file"
@@ -181,14 +241,14 @@ const Register = () => {
               </label>
             </div>
 
-            {/* Matriculation Vector Registration Input */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
                 Matric Number
               </label>
               <input
                 type="text"
-                className="block w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 transition duration-200 ease-in-out focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-400 font-mono"
+                value={formData.matric_number}
+                className="block w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm font-mono"
                 placeholder="UG/24/1001"
                 onChange={(e) =>
                   setFormData({ ...formData, matric_number: e.target.value })
@@ -197,13 +257,13 @@ const Register = () => {
               />
             </div>
 
-            {/* Academic Track Cohort Year Selection Menu */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
                 Level Cohort
               </label>
               <select
-                className="block w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 transition duration-200 ease-in-out focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 cursor-pointer"
+                value={formData.level}
+                className="block w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm cursor-pointer"
                 onChange={(e) =>
                   setFormData({ ...formData, level: e.target.value })
                 }
@@ -226,7 +286,8 @@ const Register = () => {
             </label>
             <input
               type="text"
-              className="block w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 transition duration-200 ease-in-out focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 placeholder:text-slate-400 font-mono"
+              value={formData.staff_id}
+              className="block w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-2.5 text-sm font-mono"
               placeholder="STAFF/SCI/042"
               onChange={(e) =>
                 setFormData({ ...formData, staff_id: e.target.value })
@@ -240,10 +301,17 @@ const Register = () => {
         <div className="sm:col-span-2 mt-4">
           <button
             type="submit"
-            className="inline-flex items-center justify-center w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-blue-600/10 transition-all duration-200 ease-in-out hover:bg-blue-500 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+            disabled={isSubmitting}
+            className="inline-flex items-center justify-center w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-md transition-all active:scale-[0.99] disabled:bg-slate-300 disabled:cursor-not-allowed"
           >
-            <ShieldCheck size={18} className="mr-2" />
-            Provision {role === "student" ? "Student" : "Lecturer"} Credentials
+            {isSubmitting ? (
+              <Loader2 className="mr-2 animate-spin" size={18} />
+            ) : (
+              <ShieldCheck size={18} className="mr-2" />
+            )}
+            {isSubmitting
+              ? "Provisioning Profile..."
+              : `Provision ${role === "student" ? "Student" : "Lecturer"} Credentials`}
           </button>
         </div>
       </form>
