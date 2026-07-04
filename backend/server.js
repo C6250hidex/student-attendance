@@ -54,6 +54,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.options("*", cors());
 
 // Serve static files (This allows the browser to see student photos)
 app.use("/uploads", express.static("uploads"));
