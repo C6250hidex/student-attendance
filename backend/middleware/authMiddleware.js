@@ -18,7 +18,11 @@ export const protect = (req, res, next) => {
 
 export const authorize = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+    // Ensure both are lowercase to prevent casing bugs
+    const userRole = req.user.role.toLowerCase();
+    const allowedRoles = roles.map((r) => r.toLowerCase());
+
+    if (!allowedRoles.includes(userRole)) {
       return res
         .status(403)
         .json({ message: `Role ${req.user.role} is not authorized` });
