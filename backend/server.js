@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import http from "http";
 import { Server } from "socket.io"; // Import added here
 import path from "path";
+import fs from "fs";
 
 // Route Imports
 import authRoutes from "./routes/authRoutes.js";
@@ -31,6 +32,11 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+
+const uploadDir = "./uploads";
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
 
 // MIDDLEWARES
 app.use(
