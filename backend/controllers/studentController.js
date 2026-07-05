@@ -85,3 +85,26 @@ export const getMyProfile = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+// Get a single student by their ID
+export const getStudentById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await db.execute(
+      `
+            SELECT students.*, users.full_name, users.email, departments.name as department_name 
+            FROM students 
+            JOIN users ON students.user_id = users.id 
+            JOIN departments ON students.department_id = departments.id
+            WHERE students.id = ?
+        `,
+      [id],
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Student record not found" });
+    }
+    res.json(rows[0]);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};

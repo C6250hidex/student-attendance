@@ -3,6 +3,7 @@ import {
   addStudent,
   getAllStudents,
   getMyProfile,
+  getStudentById,
 } from "../controllers/studentController.js";
 import { upload } from "../middleware/uploadMiddleware.js";
 import { protect, authorize } from "../middleware/authMiddleware.js";
@@ -18,5 +19,6 @@ router.post(
 );
 router.get("/", protect, getAllStudents);
 router.get("/profile/me", protect, getMyProfile);
+router.get("/:id", protect, getStudentById);
 
 export default router;
