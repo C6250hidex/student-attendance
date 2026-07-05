@@ -6,7 +6,6 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import http from "http";
 import { Server } from "socket.io";
-import path from "path";
 import fs from "fs";
 
 // Route Imports
@@ -24,80 +23,62 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-// 1. DYNAMIC CORS NORMALIZATION
-const rawFrontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-const frontendUrl = rawFrontendUrl.replace(/\/$/, ""); // Remove trailing slash
+// 1. RENDER PROXY SETTING
+app.set('trust proxy', 1);
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or Postman)
+// 2. ROBUST CORS CONFIGURATION
+const allowedOrigins = [
+  "https://student-attendance-61cr.onrender.com", // YOUR FRONTEND
+  "http://localhost:5173",
+  "http://localhost:3000"
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
+    
+    // Clean the strings to prevent slash-mismatch
+    const cleanOrigin = origin.replace(/\/$/, "");
+    const isAllowed = allowedOrigins.some(o => o.replace(/\/$/, "") === cleanOrigin);
 
-    const incomingOrigin = origin.replace(/\/$/, "");
-
-    // Check if the request comes from our production URL or Localhost
-    if (
-      incomingOrigin === frontendUrl ||
-      incomingOrigin === "http://localhost:5173" ||
-      incomingOrigin === "http://localhost:3000"
-    ) {
+    if (isAllowed) {
       callback(null, true);
     } else {
-      console.error(
-        `🚨 CORS REJECTED: Request from [${origin}] does not match allowed [${frontendUrl}]`,
-      );
-      callback(new Error("Not allowed by CORS"));
+      console.error(`🚨 CORS REJECTED: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization",
-    "X-Requested-With",
-    "Accept",
-  ],
-  preflightContinue: false,
-  optionsSuccessStatus: 204,
-};
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
+}));
 
-// 2. APPLY CORS AT THE VERY TOP
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Handle Preflight for all routes
+app.options("*", cors()); // Enable pre-flight for all routes
 
-// 3. INITIALIZE SOCKET.IO WITH SAME ORIGIN
-const io = new Server(server, {
-  cors: {
-    origin: [frontendUrl, "http://localhost:5173"],
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-});
-
-// 4. STORAGE & SECURITY MIDDLEWARE
-const uploadDir = "./uploads";
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-}
-
-app.use(
-  helmet({
-    crossOriginResourcePolicy: false, // Required to show student photos on frontend
-  }),
-);
-
+// 3. STANDARD MIDDLEWARES
+app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Serve static files correctly
+// 4. STORAGE SETUP
+const uploadDir = "./uploads";
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 app.use("/uploads", express.static("uploads"));
 
-// Attach Socket.io to the app instance
+// 5. SOCKET.IO
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
 app.set("socketio", io);
 
-// 5. ROUTES
+// 6. MOUNT ROUTES (Check these prefixes!)
 app.use("/api/auth", authRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
@@ -108,19 +89,9 @@ app.use("/api/departments", departmentRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/reports", reportRoutes);
 
-// Health Check for Render
-app.get("/", (req, res) => {
-  res.status(200).send("Attendance System API is live and healthy.");
-});
-
-// Global Error Handler
-app.use((err, req, res, next) => {
-  console.error("Internal Server Error:", err.stack);
-  res.status(500).json({ message: "Something went wrong on the server" });
-});
+app.get("/", (req, res) => res.send("Backend is Running"));
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🔗 Allowing traffic from: ${frontendUrl}`);
+  console.log(`🚀 Server on ${PORT}. Allowed: ${allowedOrigins[0]}`);
 });
